@@ -1,0 +1,12 @@
+ ·MOTORES x6
+ ·lCD x1
+ ·PULSADORES (pequeños) x10
+ ·PULSADORES (grandes) x4
+ ·LASERS x2
+ ·POTENCIOMETRO x1
+ ·SENSORES LUZ x3
+ ·SENSOR ULTRASONIDO x1
+ ·ZUMBADORES PAS. x1
+ ·ZUMBADORES ACT. x1
+ ·LED RGB x1
+ ·LEDS (rojo, azul, verde) x[ind]
