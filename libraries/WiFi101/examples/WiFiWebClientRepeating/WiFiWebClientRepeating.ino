@@ -1,8 +1,8 @@
 /*
-  Repeating Wifi Web Client
+  Repeating WiFi Web Client
 
  This sketch connects to a a web server and makes a request
- using an Arduino Wifi shield.
+ using an Arduino WiFi shield.
 
  Circuit:
  * WiFi shield attached to pins SPI pins and pin 7
@@ -13,24 +13,26 @@
  modified 13 Jan 2014
  by Federico Vanzati
 
- http://arduino.cc/en/Tutorial/WifiWebClientRepeating
+ http://arduino.cc/en/Tutorial/WiFiWebClientRepeating
  This code is in the public domain.
  */
 
 #include <SPI.h>
 #include <WiFi101.h>
- 
-char ssid[] = "yourNetwork";      //  your network SSID (name)
-char pass[] = "secretPassword";   // your network password
+
+#include "arduino_secrets.h" 
+///////please enter your sensitive data in the Secret tab/arduino_secrets.h
+char ssid[] = SECRET_SSID;        // your network SSID (name)
+char pass[] = SECRET_PASS;    // your network password (use for WPA, or use as key for WEP)
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 
 int status = WL_IDLE_STATUS;
 
-// Initialize the Wifi client library
+// Initialize the WiFi client library
 WiFiClient client;
 
 // server address:
-char server[] = "www.arduino.cc";
+char server[] = "example.org";
 //IPAddress server(64,131,82,241);
 
 unsigned long lastConnectionTime = 0;            // last time you connected to the server, in milliseconds
@@ -50,7 +52,7 @@ void setup() {
     while (true);
   }
 
-  // attempt to connect to Wifi network:
+  // attempt to connect to WiFi network:
   while ( status != WL_CONNECTED) {
     Serial.print("Attempting to connect to SSID: ");
     Serial.println(ssid);
@@ -61,7 +63,7 @@ void setup() {
     delay(10000);
   }
   // you're connected now, so print out the status:
-  printWifiStatus();
+  printWiFiStatus();
 }
 
 void loop() {
@@ -91,8 +93,8 @@ void httpRequest() {
   if (client.connect(server, 80)) {
     Serial.println("connecting...");
     // send the HTTP PUT request:
-    client.println("GET /latest.txt HTTP/1.1");
-    client.println("Host: www.arduino.cc");
+    client.println("GET / HTTP/1.1");
+    client.println("Host: example.org");
     client.println("User-Agent: ArduinoWiFi/1.1");
     client.println("Connection: close");
     client.println();
@@ -107,7 +109,7 @@ void httpRequest() {
 }
 
 
-void printWifiStatus() {
+void printWiFiStatus() {
   // print the SSID of the network you're attached to:
   Serial.print("SSID: ");
   Serial.println(WiFi.SSID());
@@ -123,5 +125,3 @@ void printWifiStatus() {
   Serial.print(rssi);
   Serial.println(" dBm");
 }
-
-

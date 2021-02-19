@@ -1,7 +1,7 @@
 /*
 
- This example connects to an unencrypted Wifi network.
- Then it prints the  MAC address of the Wifi shield,
+ This example connects to an unencrypted WiFi network.
+ Then it prints the  MAC address of the WiFi shield,
  the IP address obtained, and other network details.
 
  Circuit:
@@ -15,9 +15,11 @@
 #include <SPI.h>
 #include <WiFi101.h>
 
-char ssid[] = "yourNetwork";     //  your network SSID (name)
-char pass[] = "secretPassword";  // your network password
-int status = WL_IDLE_STATUS;     // the Wifi radio's status
+#include "arduino_secrets.h" 
+///////please enter your sensitive data in the Secret tab/arduino_secrets.h
+char ssid[] = SECRET_SSID;        // your network SSID (name)
+char pass[] = SECRET_PASS;    // your network password (use for WPA, or use as key for WEP)
+int status = WL_IDLE_STATUS;     // the WiFi radio's status
 
 void setup() {
   //Initialize serial and wait for port to open:
@@ -33,7 +35,7 @@ void setup() {
     while (true);
   }
 
-  // attempt to connect to Wifi network:
+  // attempt to connect to WiFi network:
   while ( status != WL_CONNECTED) {
     Serial.print("Attempting to connect to WPA SSID: ");
     Serial.println(ssid);
@@ -47,7 +49,7 @@ void setup() {
   // you're connected now, so print out the data:
   Serial.print("You're connected to the network");
   printCurrentNet();
-  printWifiData();
+  printWiFiData();
 
 }
 
@@ -57,7 +59,7 @@ void loop() {
   printCurrentNet();
 }
 
-void printWifiData() {
+void printWiFiData() {
   // print your WiFi shield's IP address:
   IPAddress ip = WiFi.localIP();
   Serial.print("IP Address: ");
@@ -68,17 +70,7 @@ void printWifiData() {
   byte mac[6];
   WiFi.macAddress(mac);
   Serial.print("MAC address: ");
-  Serial.print(mac[5], HEX);
-  Serial.print(":");
-  Serial.print(mac[4], HEX);
-  Serial.print(":");
-  Serial.print(mac[3], HEX);
-  Serial.print(":");
-  Serial.print(mac[2], HEX);
-  Serial.print(":");
-  Serial.print(mac[1], HEX);
-  Serial.print(":");
-  Serial.println(mac[0], HEX);
+  printMacAddress(mac);
 
 }
 
@@ -91,17 +83,7 @@ void printCurrentNet() {
   byte bssid[6];
   WiFi.BSSID(bssid);
   Serial.print("BSSID: ");
-  Serial.print(bssid[5], HEX);
-  Serial.print(":");
-  Serial.print(bssid[4], HEX);
-  Serial.print(":");
-  Serial.print(bssid[3], HEX);
-  Serial.print(":");
-  Serial.print(bssid[2], HEX);
-  Serial.print(":");
-  Serial.print(bssid[1], HEX);
-  Serial.print(":");
-  Serial.println(bssid[0], HEX);
+  printMacAddress(bssid);
 
   // print the received signal strength:
   long rssi = WiFi.RSSI();
@@ -115,3 +97,15 @@ void printCurrentNet() {
   Serial.println();
 }
 
+void printMacAddress(byte mac[]) {
+  for (int i = 5; i >= 0; i--) {
+    if (mac[i] < 16) {
+      Serial.print("0");
+    }
+    Serial.print(mac[i], HEX);
+    if (i > 0) {
+      Serial.print(":");
+    }
+  }
+  Serial.println();
+}

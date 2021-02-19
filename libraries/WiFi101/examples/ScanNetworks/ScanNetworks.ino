@@ -1,7 +1,7 @@
 /*
 
- This example  prints the Wifi shield's MAC address, and
- scans for available Wifi networks using the Wifi shield.
+ This example  prints the WiFi shield's MAC address, and
+ scans for available WiFi networks using the WiFi shield.
  Every ten seconds, it scans again. It doesn't actually
  connect to any network, so no encryption scheme is specified.
 
@@ -24,7 +24,7 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
-  
+
   // check for the presence of the shield:
   if (WiFi.status() == WL_NO_SHIELD) {
     Serial.println("WiFi shield not present");
@@ -48,23 +48,13 @@ void loop() {
 }
 
 void printMacAddress() {
-  // the MAC address of your Wifi shield
+  // the MAC address of your WiFi shield
   byte mac[6];
 
   // print your MAC address:
   WiFi.macAddress(mac);
   Serial.print("MAC: ");
-  Serial.print(mac[5], HEX);
-  Serial.print(":");
-  Serial.print(mac[4], HEX);
-  Serial.print(":");
-  Serial.print(mac[3], HEX);
-  Serial.print(":");
-  Serial.print(mac[2], HEX);
-  Serial.print(":");
-  Serial.print(mac[1], HEX);
-  Serial.print(":");
-  Serial.println(mac[0], HEX);
+  printMacAddress(mac);
 }
 
 void listNetworks() {
@@ -116,5 +106,15 @@ void printEncryptionType(int thisType) {
   }
 }
 
-
-
+void printMacAddress(byte mac[]) {
+  for (int i = 5; i >= 0; i--) {
+    if (mac[i] < 16) {
+      Serial.print("0");
+    }
+    Serial.print(mac[i], HEX);
+    if (i > 0) {
+      Serial.print(":");
+    }
+  }
+  Serial.println();
+}

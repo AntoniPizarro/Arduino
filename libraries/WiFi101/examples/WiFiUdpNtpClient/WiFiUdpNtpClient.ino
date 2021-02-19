@@ -21,8 +21,10 @@
 #include <WiFiUdp.h>
 
 int status = WL_IDLE_STATUS;
-char ssid[] = "mynetwork";  //  your network SSID (name)
-char pass[] = "mypassword";       // your network password
+#include "arduino_secrets.h" 
+///////please enter your sensitive data in the Secret tab/arduino_secrets.h
+char ssid[] = SECRET_SSID;        // your network SSID (name)
+char pass[] = SECRET_PASS;    // your network password (use for WPA, or use as key for WEP)
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 
 unsigned int localPort = 2390;      // local port to listen for UDP packets
@@ -51,7 +53,7 @@ void setup()
     while (true);
   }
 
-  // attempt to connect to Wifi network:
+  // attempt to connect to WiFi network:
   while ( status != WL_CONNECTED) {
     Serial.print("Attempting to connect to SSID: ");
     Serial.println(ssid);
@@ -63,7 +65,7 @@ void setup()
   }
 
   Serial.println("Connected to wifi");
-  printWifiStatus();
+  printWiFiStatus();
 
   Serial.println("\nStarting connection to server...");
   Udp.begin(localPort);
@@ -152,7 +154,7 @@ unsigned long sendNTPpacket(IPAddress& address)
 }
 
 
-void printWifiStatus() {
+void printWiFiStatus() {
   // print the SSID of the network you're attached to:
   Serial.print("SSID: ");
   Serial.println(WiFi.SSID());

@@ -6,7 +6,7 @@
  You can see the client's input in the serial monitor as well.
 
  This example is written for a network using WPA encryption. For
- WEP or WPA, change the Wifi.begin() call accordingly.
+ WEP or WPA, change the WiFi.begin() call accordingly.
 
 
  Circuit:
@@ -22,8 +22,10 @@
 #include <SPI.h>
 #include <WiFi101.h>
 
-char ssid[] = "yourNetwork"; //  your network SSID (name)
-char pass[] = "secretPassword";    // your network password (use for WPA, or use as key for WEP)
+#include "arduino_secrets.h" 
+///////please enter your sensitive data in the Secret tab/arduino_secrets.h
+char ssid[] = SECRET_SSID;        // your network SSID (name)
+char pass[] = SECRET_PASS;    // your network password (use for WPA, or use as key for WEP)
 
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 
@@ -31,7 +33,7 @@ int status = WL_IDLE_STATUS;
 
 WiFiServer server(23);
 
-boolean alreadyConnected = false; // whether or not the client was connected previously
+bool alreadyConnected = false; // whether or not the client was connected previously
 
 void setup() {
   //Initialize serial and wait for port to open:
@@ -47,7 +49,7 @@ void setup() {
     while (true);
   }
 
-  // attempt to connect to Wifi network:
+  // attempt to connect to WiFi network:
   while ( status != WL_CONNECTED) {
     Serial.print("Attempting to connect to SSID: ");
     Serial.println(ssid);
@@ -61,7 +63,7 @@ void setup() {
   // start the server:
   server.begin();
   // you're connected now, so print out the status:
-  printWifiStatus();
+  printWiFiStatus();
 }
 
 
@@ -92,7 +94,7 @@ void loop() {
 }
 
 
-void printWifiStatus() {
+void printWiFiStatus() {
   // print the SSID of the network you're attached to:
   Serial.print("SSID: ");
   Serial.println(WiFi.SSID());

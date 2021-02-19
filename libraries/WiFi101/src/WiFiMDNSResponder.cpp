@@ -21,8 +21,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+#ifdef ARDUINO_ARCH_AVR
 #include <avr/pgmspace.h>
-#ifndef ARDUINO_ARCH_AVR
+#endif
+#ifndef __AVR__
 #include <strings.h>
 #endif
 
@@ -40,7 +42,7 @@
 const uint8_t expectedRequestHeader[HEADER_SIZE] PROGMEM = {
   0x00, 0x00,
   0x00, 0x00,
-  0x00, 0x01,
+  0x00, 0x01, // questions (these 2 bytes are ignored)
   0x00, 0x00,
   0x00, 0x00,
   0x00, 0x00
@@ -80,7 +82,7 @@ const uint8_t nsecRecord[] PROGMEM = {
 const uint8_t domain[] PROGMEM = { 'l', 'o', 'c', 'a', 'l' };
 
 WiFiMDNSResponder::WiFiMDNSResponder() :
-  expectedRequestLength(0)
+  minimumExpectedRequestLength(0)
 {
 }
 
@@ -94,7 +96,7 @@ bool WiFiMDNSResponder::begin(const char* _name, uint32_t _ttlSeconds)
 
   if (nameLength > 255) {
     // Can only handle domains that are upto 255 chars in length.
-    expectedRequestLength = 0;
+    minimumExpectedRequestLength = 0;
     return false;
   }
 
@@ -102,11 +104,11 @@ bool WiFiMDNSResponder::begin(const char* _name, uint32_t _ttlSeconds)
   ttlSeconds = _ttlSeconds;
 
   name.toLowerCase();
-  expectedRequestLength = HEADER_SIZE + 1 + nameLength + 1 + sizeof(domain) + 5;
+  minimumExpectedRequestLength = HEADER_SIZE + 1 + nameLength + 1 + sizeof(domain) + 5;
 
   // Open the MDNS UDP listening socket on port 5353 with multicast address
   // 224.0.0.251 (0xE00000FB)
-  if (!udpSocket.beginMulti(IPAddress(224, 0, 0, 251), 5353)) {
+  if (!udpSocket.beginMulticast(IPAddress(224, 0, 0, 251), 5353)) {
     return false;
   }
 
@@ -122,9 +124,11 @@ void WiFiMDNSResponder::poll()
 
 bool WiFiMDNSResponder::parseRequest()
 {
-  if (udpSocket.parsePacket()) {
+  int packetLength = udpSocket.parsePacket();
+
+  if (packetLength) {
     // check if parsed packet matches expected request length
-    if (udpSocket.available() != expectedRequestLength) {
+    if (packetLength < minimumExpectedRequestLength) {
       // it does not, read the full packet in and drop data
       while(udpSocket.available()) {
         udpSocket.read();
@@ -133,9 +137,14 @@ bool WiFiMDNSResponder::parseRequest()
       return false;
     }
 
-    // read packet
-    uint8_t request[expectedRequestLength];
-    udpSocket.read(request, expectedRequestLength);
+    // read up to the min expect request length
+    uint8_t request[minimumExpectedRequestLength];
+    udpSocket.read(request, minimumExpectedRequestLength);
+
+    // discard the rest
+    while(udpSocket.available()) {
+      udpSocket.read();
+    }
 
     // parse request
     uint8_t requestNameLength   = request[HEADER_SIZE];
@@ -145,14 +154,15 @@ bool WiFiMDNSResponder::parseRequest()
     uint16_t requestQtype;
     uint16_t requestQclass;
 
-    memcpy(&requestQtype, &request[expectedRequestLength - 4], sizeof(requestQtype));
-    memcpy(&requestQclass, &request[expectedRequestLength - 2], sizeof(requestQclass));
+    memcpy(&requestQtype, &request[minimumExpectedRequestLength - 4], sizeof(requestQtype));
+    memcpy(&requestQclass, &request[minimumExpectedRequestLength - 2], sizeof(requestQclass));
 
     requestQtype = _ntohs(requestQtype);
     requestQclass = _ntohs(requestQclass);
 
     // compare request
-    if (memcmp_P(request, expectedRequestHeader, HEADER_SIZE) == 0 &&            // request header match
+    if (memcmp_P(request, expectedRequestHeader, 4) == 0 &&                      // request header start match
+        memcmp_P(&request[6], &expectedRequestHeader[6], 6) == 0 &&              // request header end match
         requestNameLength == name.length() &&                                    // name length match
         strncasecmp(name.c_str(), (char*)requestName, requestNameLength) == 0 && // name match
         requestDomainLength == sizeof(domain) &&                                 // domain length match

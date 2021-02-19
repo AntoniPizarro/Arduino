@@ -13,7 +13,7 @@
  Then you can access the device in a browser at 'http://wifi101.local/'.
 
  This example is written for a network using WPA encryption. For
- WEP or WPA, change the Wifi.begin() call accordingly.
+ WEP or WPA, change the WiFi.begin() call accordingly.
 
  Circuit:
  * WiFi shield attached
@@ -32,8 +32,10 @@
 #include <WiFi101.h>
 #include <WiFiMDNSResponder.h>
 
-char ssid[] = "yourNetwork";      // your network SSID (name)
-char pass[] = "secretPassword";   // your network password
+#include "arduino_secrets.h" 
+///////please enter your sensitive data in the Secret tab/arduino_secrets.h
+char ssid[] = SECRET_SSID;        // your network SSID (name)
+char pass[] = SECRET_PASS;    // your network password (use for WPA, or use as key for WEP)
 int keyIndex = 0;                 // your network key Index number (needed only for WEP)
 
 char mdnsName[] = "wifi101"; // the MDNS name that the board will respond to
@@ -62,7 +64,7 @@ void setup() {
     while (true);
   }
 
-  // attempt to connect to Wifi network:
+  // attempt to connect to WiFi network:
   while ( status != WL_CONNECTED) {
     Serial.print("Attempting to connect to SSID: ");
     Serial.println(ssid);
@@ -73,7 +75,7 @@ void setup() {
     delay(10000);
   }
   // you're connected now, so print out the status:
-  printWifiStatus();
+  printWiFiStatus();
 
   server.begin();
 
@@ -101,7 +103,7 @@ void loop() {
   if (client) {
     Serial.println("new client");
     // an http request ends with a blank line
-    boolean currentLineIsBlank = true;
+    bool currentLineIsBlank = true;
     while (client.connected()) {
       if (client.available()) {
         char c = client.read();
@@ -150,7 +152,7 @@ void loop() {
 }
 
 
-void printWifiStatus() {
+void printWiFiStatus() {
   // print the SSID of the network you're attached to:
   Serial.print("SSID: ");
   Serial.println(WiFi.SSID());
